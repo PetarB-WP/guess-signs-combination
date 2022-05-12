@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en" id="html-ID">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guess Four Signs</title>
+	<link rel="stylesheet" href="css/main.css">
+	
+	<script src="https://kit.fontawesome.com/ec860332ea.js" crossorigin="anonymous"></script>
+	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+
+<body id="bodyID">	
+	
+	<div style="position:fixed; top:10; left:0; display:none;"><!-- display:flex;flex-direction: column; -->
+		<button id="testBtn">Test</button>
+		<button id="testBtn0" onclick="testFun()" style="margin-top:10px">Scroll</button>
+	</div>
+
+	<!-- Result Info -->
+	<div id="resultInfo" class="frame-ri">
+		<!-- trans-opc trans-dur-500 trans-d-1000 trans-opacity-in -->
+		<div id="resultInfoContent" class="content-ri anm-opc1">
+			<span id="resultInfoClose" class="close-ri">X</span>
+			
+			<!-- Message -->
+			<div id="titleResult" class="title-res">
+				<h2>You <span class="anm-zoom1 anm-d4"></span></h2><!-- <span class="result-lose">LOSE</span> -->
+			</div>
+			
+			<!-- Show CORECT Combination -->
+			<div id="corectComb" class="corect-comb">
+				<i class="fa-solid fa-diamond anm-zoom2 anm-d4"></i>
+				<i class="fa-solid fa-diamond anm-zoom2 anm-d6"></i>
+				<i class="fa-solid fa-diamond anm-zoom2 anm-d8"></i>
+				<i class="fa-solid fa-diamond anm-zoom2 anm-d10"></i>
+			</div>
+			
+			<!-- Image Message -->
+			<div id="msgImage" class="f-msg-img">
+				<div class="img-win anm-zoom3 anm-d6"></div>
+				<div class="img-lose">
+					<i class="fa-solid fa-face-frown anm-zoom4 anm-d6"></i>
+				</div>				
+			</div>
+			
+			<!-- Message on the end -->
+			<div id="msgEnd" class="msg-end"></div>
+		</div>
+	</div>
+	
+	<!-- Game Frame -->
+	<div id="gameFrame" class="frame-m">	
+		<div class="f-title">
+			<h1>Guess Four Signs</h1>
+			<hr>
+		</div>	
+		<!-- Main GAME area -->
+		<div id="fGame" class="f-game"></div>
+
+		<!-- Show corect result when game is finished on FRONT -->
+		<div id="combFront" class="f-comb-front">
+			<div class="f-cf trans-opc-1 trans-dur-800 anm-d8"> <!-- f-game -->
+				<h3>Corect combination</h3>
+				<div id="combFrontSq" class="comb-front-row">
+					<div class="sq sq-comb-0"></div>
+					<div class="sq sq-comb-1"><i class="fa-solid fa-diamond anm-zoom2 anm-d4"></i></div>
+					<div class="sq sq-comb-2"><i class="fa-solid fa-diamond anm-zoom2 anm-d4"></i></div>
+					<div class="sq sq-comb-3"><i class="fa-solid fa-diamond anm-zoom2 anm-d4"></i></div>
+					<div class="sq sq-comb-4"><i class="fa-solid fa-diamond anm-zoom2 anm-d4"></i></div>
+				</div>
+			</div>
+		</div>
+		
+		<div id="fControl" class="f-control">
+			<div class="f-ctrl">	
+				<div id="ctrSigns" class="ctr-signs">
+					<div class="ctr-sign"><i class="fa-solid fa-diamond trans-hover1 trans-dur-100" data-id="1"></i></div>
+					<div class="ctr-sign"><i class="fa-solid fa-heart trans-hover1 trans-dur-100" data-id="2"></i></div>
+					<div class="ctr-sign"><i class="fa-solid fa-apple-whole trans-hover1 trans-dur-100" data-id="3"></i></div>
+					<div class="ctr-sign"><i class="fa-solid fa-star trans-hover1 trans-dur-100" data-id="4"></i></div>
+					<div class="ctr-sign"><i class="fa-solid fa-moon trans-hover1 trans-dur-100" data-id="5"></i></div>
+					<div class="ctr-sign"><i class="fa-solid fa-star-of-life trans-hover1 trans-dur-100" data-id="6"></i></div>
+				</div>
+				<!-- Delete sign -->
+				<div id="delButton" class="ctr-sign ctr-sign-btn"><i class="fa-solid fa-caret-left trans-hover trans-dur-200" data-id="delButton"></i></div>
+			</div>
+			
+			<div class="f-btn-check">
+				<button id="checkButton" class="check-btn trans-hover trans-dur-200">CHECK</button>
+			</div>
+			
+			<div class="f-btn-start">
+				<button id="startButton" class="start-btn trans-hover trans-dur-200">START NEW GAME</button>
+			</div>
+		</div>
+		<div class="f-guide"></div>
+	</div>	
+
+
+
+<script>
+	const signs_i = {
+		right_arrow: "<i class=\"fa-solid fa-caret-right\"></i>",
+		diamond: "<i class=\"fa-solid fa-diamond\"></i>",
+		heart: "<i class=\"fa-solid fa-heart\"></i>",
+		apple: "<i class=\"fa-solid fa-apple-whole\"></i>",
+		star: "<i class=\"fa-solid fa-star\"></i>",
+		moon: "<i class=\"fa-solid fa-moon\"></i>",
+		snowflake: "<i class=\"fa-solid fa-star-of-life\"></i>",
+		circle: "<i class=\"fa-solid fa-circle\"></i>",
+		square: "<i class=\"fa-solid fa-square\"></i>"
+	};
+
+	const signs = [
+		'fa-caret-right',
+		'fa-diamond',
+		'fa-heart',
+		'fa-apple-whole',
+		'fa-star',
+		'fa-moon',
+		'fa-star-of-life',
+		'fa-circle'
+	];
+
+	const classList = [
+		'color-marker',
+		'color-game',
+		'color-result',
+		'trans-moveY-up', 
+		'trans-moveY-down',
+		'trans-moveY-center',
+		'trans-zoom-in',		
+		'trans-dur-800',
+		'trans-bgColor'	
+	];
+	
+	let classListArr = function(arr){
+		let arrOut = "";
+		arr.forEach(function(v, i){
+			if(i == arr.length - 1)
+				arrOut += '"' + v + '"';
+			else
+				arrOut += '"' + v + '",';
+		});
+		return arrOut;
+	}	
+	
+	const classListStr = classListArr(classList);
+	// console.log(classListStr);
+		
+	function Row(signs, rowNum){
+		this.colNumber = 9;
+		this.signs = [];
+		this.div_el = [];
+		this.row_el;
+						
+		for (let key in signs){
+			this.signs[key] = signs[key];
+		}
+		
+		this.createShifted = function(step){
+			this.row_el = document.createElement("div");
+			this.row_el.classList.add("f-row", "row-" + rowNum);
+		
+			if(Number.isInteger(step) && step >= -this.signs.length && step <= this.signs.length){	
+				if(step > 0){				
+					for(let i = 0; i < step; i++){
+						this.signs.unshift(this.signs[this.signs.length - 1]); // adds new element to the beginning of an array
+						this.signs.pop(); // delete last element
+					}				
+				}else{
+					step = -step;
+					for(let i = 0; i < step; i++){
+						this.signs.push(this.signs[0]); // adds new element to the end
+						this.signs.shift(); // delete first element
+					}	
+				}				
+			}
+			if(this.colNumber > this.signs.length){	
+				let intN = Math.floor(this.colNumber / this.signs.length);
+				let remN = this.colNumber % this.signs.length;
+				let d = 0;
+				
+				// root
+				for(let i = 0; i < intN; i++){
+					for(let n = 0; n < this.signs.length; n++){
+						let i_el = document.createElement("i");
+						this.div_el[d] = document.createElement("div");
+						this.div_el[d].classList.add("el-"+d, "sq");
+						i_el.classList.add("fa-solid", this.signs[n], "trans-z1", "trans-dur-300");
+						this.div_el[d].appendChild(i_el);
+						this.row_el.appendChild(this.div_el[d]);
+						d++;
+					}
+					n = 0;
+				}				
+				// rest
+				for(let h = 0; h < remN; h++){
+					let i_el = document.createElement("i");
+					this.div_el[d] = document.createElement("div");
+					this.div_el[d].classList.add("el-"+d, "sq");
+					i_el.classList.add("fa-solid", this.signs[h], "trans-z1", "trans-dur-300");
+					this.div_el[d].appendChild(i_el);					
+					this.row_el.appendChild(this.div_el[d]);
+					d++;
+				}
+			}
+			return this.row_el;
+		}
+		
+		this.cleaningRow = function(){
+			for(let i=0; i < this.colNumber; i++){
+				let i_el = document.createElement("i");
+				// this.div_el[i] = document.createElement("div");				
+				if(i == 0){
+					this.div_el[i].classList.add("el-"+i, "sq", "color-marker", "trans-moveY-up", "trans-dur-800", "trans-bgColor"); // trans-moveY-up WILL be deleted
+					i_el.classList.add("fa-solid", signs[0], "trans-moveY", "trans-dur-800");
+				}else if(i > 0 && i < 5){
+					this.div_el[i].classList.add("el-"+i, "sq", "color-game", "trans-dur-800", "trans-bgColor");
+					i_el.classList.add("fa-solid", "trans-z1", "trans-dur-300");
+				}else{
+					this.div_el[i].classList.add("el-"+i, "sq", "color-result", "trans-dur-800", "trans-bgColor");
+					i_el.classList.add("fa-solid", "trans-z1", "trans-dur-300");
+				}	
+				this.div_el[i].appendChild(i_el);
+				// this.row_el.appendChild(this.div_el[i]);
+			}
+			return this.row_el;
+		}
+				
+		this.removeI = function(){
+			for(let i=0; i < this.colNumber; i++){				
+				// this.div_el[i].classList.remove(classListStr);
+				this.div_el[i].removeChild(this.div_el[i].firstElementChild);
+			}
+		}
+				
+		this.putSign = function(signID, pos, resColor){
+			for (let key in signs){
+				this.signs[key] = signs[key];
+			}
+			if(pos == 0){
+				//this.div_el[pos].children[0].classList.add(this.signs[signID]);
+				
+				this.div_el[pos].classList.remove("trans-moveY-up"); // "trans-moveY-down", 
+				
+				// this.div_el[pos].classList.add("trans-moveY-center");
+			}else if(pos > 0 && pos < 5){
+				this.div_el[pos].children[0].classList.add(this.signs[signID]);
+				this.div_el[pos].classList.add("trans-zoom-in");
+			}else{
+				this.div_el[pos].children[0].classList.add(this.signs[signID]);
+				this.div_el[pos].classList.add("trans-zoom-in");
+				if(resColor){
+					this.div_el[pos].classList.add("res-true");
+				}else{
+					this.div_el[pos].classList.add("res-false");
+				}
+			}
+			// this.div_el[pos].replaceChild(newElement, this.div_el[pos].childNodes[0]);
+		}
+		
+		this.removeSign = function(signID, pos){
+			for (let key in signs){
+				this.signs[key] = signs[key];
+			}
+			if(pos == 0){
+				this.div_el[pos].classList.remove("trans-moveY-up"); // "trans-moveY-center"
+				this.div_el[pos].classList.add("trans-moveY-down");
+			}else{
+				let _this = this;
+				this.div_el[pos].classList.remove("trans-zoom-in");
+				setTimeout(function(){					
+					_this.div_el[pos].children[0].classList.remove(_this.signs[signID]);
+				}, 350);
+			}
+		}
+				
+		this.transZoomOn = function(){
+			this.div_el.forEach(function(v, index){				
+				v.classList.add("trans-zoom-in");
+			});
+		}
+				
+		this.transOff = function(init_flag){
+			this.div_el.forEach(function(v, index){
+				v.classList.remove("color-marker", "color-game", "color-result", "trans-zoom-in", "trans-moveY-down", "trans-moveY-up", "res-true", "res-false");
+				if(index == 0 && init_flag == true){
+					v.classList.add("trans-moveY-up");
+				}				
+			});
+		}
+	}
+	
+	//---------------------
+	// CONTROL OBJECT
+	//---------------------
+	function Control(maxRow){
+		// let index = Math.floor(Math.random() * this.signs.length); // 0 to 8
+		this.row = [];
+		this.currentRow = 0;
+		this.currentCol = 0;
+		this.userInput = []; // user input signs
+		this.combination = []; // random combination
+		this.MAX_ROW = maxRow;
+		
+		this.setCurrentRow = function(v){
+			this.currentRow = v;
+		}
+		
+		this.setCurrentCol = function(v){
+			this.currentCol = v;
+		}
+		
+		this.cInitGame = function(){
+			let row;
+			for(let i = 0; i < this.MAX_ROW; i++){
+				this.row[i] =  new Row(signs, i);
+				row = this.row[i].createShifted(-i);
+				fGame.appendChild(row);
+			}
+		}
+		
+		this.cTransZoomOn = function(){
+			let _this = this;
+			if(typeof _this.row[0] !== "undefined"){
+				for(let i = 0; i < this.MAX_ROW; i++){
+					setTimeout(function(){
+						_this.row[i].transZoomOn();
+					}, (i+1)*100);
+				}
+			}
+		}
+		
+		this.cTransOff = function(init_flag = false){
+			let _this = this;
+			let n = 1;
+			for(let i = this.MAX_ROW-1; i > -1; i--){
+				setTimeout(function(){
+					_this.row[i].transOff(init_flag);
+				}, n*100);
+				n++;
+			}
+		}
+		
+		this.cRemoveI = function(){
+			for(let i = 0; i < this.MAX_ROW; i++){			
+				this.row[i].removeI();
+			}
+		}
+		
+		this.cCleaningRow = function(){
+			let _this = this;
+			for(let i = 0; i < this.MAX_ROW; i++){			
+				setTimeout(function(){				
+					_this.row[i].cleaningRow();
+				}, i*150);
+			}
+		}
+		
+		this.cPutSignGame = function(signID, resColor = true){
+			this.row[this.currentRow].putSign(signID, this.currentCol, resColor);
+		}
+	
+		this.cRemoveSignGame = function(signID, column){
+			let currentColumn = (typeof column === "undefined") ? this.currentCol : column;
+			this.row[this.currentRow].removeSign(signID, currentColumn);
+		}
+		
+		// Add and remove LAST member of combination array
+		//------------------------------------------------
+		this.cSaveUserInput = function(signId){
+			this.userInput.push(signId); // add sign
+		}
+		
+		this.cRemoveUserInput = function(){
+			this.userInput.pop(); // delete last sign
+		}
+		
+		// Random combination
+		//------------------------------------------------
+		
+		this.cRandomCombination = function(){
+			for(let i = 0; i < 4; i++ ){
+				this.combination[i] = Math.floor(Math.random() * 6) + 1;
+			}
+		}
+		
+		// initialiyzation user input array
+		this.cInitUserInput = function(){
+			this.userInput = [];
+		}
+		
+		this.cMakeRandomSigns = function (rootElement){
+			const arr = [];
+			const randomArr = [];
+			const randomE = [];
+			let i = 0;
+			
+			// make array of index
+			while(i < rootElement.children.length){
+				arr.push(i);
+				i++;
+			}
+			// make array of random index
+			while(arr.length > 0){
+				let ran = Math.floor(Math.random() * arr.length);
+				randomArr.push(arr[ran]);
+				arr.splice(ran, 1);
+			}
+			// console.log("arr: " + arr);
+			// console.log("randomArr: " + randomArr);
+
+			// make random rootElement array using pattern randomArr
+			i = 0;
+			while(i < randomArr.length){
+				const clone = rootElement.children[randomArr[i]].cloneNode(true); // copy children of rootElement by RANDOM pattern
+				randomE.push(clone);
+				i++;
+			}
+			// console.log("randomE length: " + randomE.length);
+			// console.log("randomE[0]: " + randomE[0].children[0].className);
+			
+			i = 0;
+			while( i < randomE.length){			
+				rootElement.removeChild(rootElement.children[0]); // remove first child
+				rootElement.appendChild(randomE[i]); // add saved element as last child
+				i++;
+			}		
+		}
+		
+		// display result for current row
+		this.cDisplayResult = function(hitted, hitted_pos){
+			if(this.currentRow < this.MAX_ROW && gameEnd == false){
+				// calculate result
+				let wrong_pos = hitted - hitted_pos;
+				if( hitted_pos > 0){
+					while(hitted_pos > 0){			
+						this.currentCol++;
+						this.cPutSignGame(7, true);
+						hitted_pos--;
+					}
+				}
+				if(wrong_pos > 0){
+					while(wrong_pos > 0){		
+						this.currentCol++;
+						this.cPutSignGame(7, false);
+						wrong_pos--;
+					}
+				}
+			}
+		}
+		
+		// calculate result
+		this.cCalculateResult = function(){
+			let user = [];
+			let comb = []; // random combination, example [1,1,1,5];
+			let hitted = 0; // pogodjeni
+			let hitted_pos = 0; // broj pogodjenih i na pravom mestu
+			let hitted_index = []; // indexi pogodjenih u comb[]
+			let hitted_index_reduce = []; // neki clanovi reda comb[] imaju iste vrednosti za razlicite "hitted_index" 
+			let rem = []; // pomocni niz
+			
+			for(let key in this.userInput){
+				user[key] = this.userInput[key];
+			}
+			for(let key in this.combination){
+				comb[key] = this.combination[key];
+			}
+			
+			user.forEach(function(vU,iU){				
+				let IND = true;				
+				comb.forEach(function(vC, iC){
+					if(hitted_index.indexOf(iC) == -1 && IND == true){					
+						// hitted
+						if(vU == vC){
+							hitted++;
+							IND = false;
+							hitted_index.push(iC);
+						}
+					}
+				});
+			});
+			// console.log("hitted: " + hitted);
+			// console.log("hitted_index: " + hitted_index);
+			//------------------------------
+			//	Example
+			//	user: 1,2,1,5
+			//	comb: 1,1,1,5
+			//	hitted_index: 0,1,3
+			//	hitted_index_reduce: 0,3
+			//------------------------------
+			
+			hitted_index.forEach(function(vH, iH){			
+				if(rem.indexOf(comb[vH]) == -1){
+					rem.push(comb[vH]);
+					hitted_index_reduce.push(vH);
+				}
+			});
+			// console.log("hitted_index_reduce: " + hitted_index_reduce);
+
+			hitted_index_reduce.forEach(function(vH, iH){	
+				let fV = comb[vH];
+				user.forEach(function(vU, iU){
+					if( vU == fV ){
+						comb.forEach(function(vC, iC){
+							if( vU == vC ){						
+								if(iU == iC){
+									hitted_pos++;
+								}
+							}
+						});
+					}
+				});
+			});
+		
+			return {hitted : hitted, hitted_pos : hitted_pos};
+		} // END - cCalculateResult
+		
+		// SET Corect combination on FRONT
+		this.cSetCorectComb = function(combFrontSq){
+			let m = 0;
+			let u = 2;
+			while(m < this.combination.length){
+				// first sign (0) is empty square, it will not be deleted
+				const corectSign = document.createElement("i");
+				combFrontSq.children[m+1].removeChild(combFrontSq.children[m+1].children[0]); 
+				corectSign.classList.add("fa-solid", signs[this.combination[m]], "anm-zoom2", "anm-d"+(u+2));
+				combFrontSq.children[m+1].appendChild(corectSign);
+				m++;
+			}
+		}
+		
+		// Turn OFF animation - result info FRONT
+		this.cResultInfoFrontOff = function(combFront){
+			// console.log("cCorectCombOff");		
+			combFront.children[0].classList.add("trans-opacity-off");
+			setTimeout(() => {
+				combFront.children[0].children[0].style.display = "none"; // title
+				combFront.children[0].children[1].style.display = "none"; // signs
+				combFront.children[0].classList.add("anm-padding-b");
+				// combFront.style.display = "none";
+			}, 1000);
+		}
+		
+		// Turn ON animation - result info FRONT
+		this.cResultInfoFrontOn = function(combFront){
+			setTimeout(() => {
+				combFront.children[0].classList.remove("anm-padding-b", "trans-opacity-off");
+				combFront.children[0].style.display = "block";
+				combFront.children[0].children[0].style.display = "flex";
+				combFront.children[0].children[1].style.display = "flex";
+			}, 500);			
+		}
+		
+		// Result info COVER BLOCK
+		this.cResultInfo = function(rc, result){
+			console.log("cResultInfo");
+			let i = 0;
+			let n = 2;
+			while( i < this.combination.length){		
+				const corectSign = document.createElement("i");
+				rc.children[2].removeChild(rc.children[2].children[0]);	// delete previously <i> element
+				corectSign.classList.add("fa-solid", signs[this.combination[i]], "anm-zoom2", "anm-d"+(n+2));
+				rc.children[2].appendChild(corectSign);
+				i++;
+				// console.log(i + " : " + corectSign.className);
+			}
+			
+			rc.children[1].children[0].children[0].classList.remove("result-win", "result-lose");
+			rc.children[3].children[0].style.display = "none";
+			rc.children[3].children[1].style.display = "none";
+		
+			// game WIN or LOSE
+			if(result['hitted'] == result['hitted_pos'] && result['hitted'] == 4){
+				console.log("WIN GAME: ");
+				// Title message
+				rc.children[1].children[0].children[0].innerHTML = "are the WINNER";
+				rc.children[1].children[0].children[0].classList.add("result-win");
+				
+				// Image WIN
+				rc.children[3].children[0].style.display = "block";
+				// Mesage on End
+				rc.children[4].innerHTML = "Play again";
+			}else{
+				console.log("LOSE GAME: ");
+				// Title message
+				rc.children[1].children[0].children[0].innerHTML = "LOST";
+				rc.children[1].children[0].children[0].classList.add("result-lose");
+
+				// Image LOSE
+				rc.children[3].children[1].style.display = "block";
+				// Message on End
+				rc.children[4].innerHTML = "Try again !";
+			}
+			rc.parentElement.style.display = "block";			
+		}
+		
+		// Scroll to element
+		this.cScrollTo = function(scroll_el){
+			let anm_d = 1000; // ms 
+			let anm_int = 60; // ms
+			let step = anm_d / anm_int;
+			let top_px = scroll_el.getBoundingClientRect().top; // position relative to viewport
+			let step_px = (top_px / step);
+			step_px = parseInt(step_px.toPrecision(3));
+			step = parseInt(step.toPrecision(3)) + 3;
+			let n = 0;
+			
+			console.log("------------------------");
+			console.log("ID: " + scroll_el.id);
+			console.log("step: " + step);
+			console.log("scroll_el TOP: " + scroll_el.getBoundingClientRect().top);
+			console.log("html TOP: " + document.documentElement.getBoundingClientRect().top);
+		
+			interval = setInterval(function(){	
+				const html = document.documentElement; // return HTML element
+				if(n < step ){
+					console.log("n: " + n);
+					console.log("scroll_el top: " + scroll_el.getBoundingClientRect().top);
+					console.log("step_px: " + step_px);
+				
+					html.scrollTop += step_px; // - 50
+				}else{
+					console.log("------------------------");
+					console.log("scroll_el top: " + scroll_el.getBoundingClientRect().top);
+					console.log("html top: " + html.getBoundingClientRect().top);
+					
+					clearInterval(interval);
+				}
+				n++;
+			}, anm_int);			
+		}
+	}
+
+	//---------------------------
+	// main program
+	//---------------------------
+	let trans_ROW_0 = 0;
+	let trans_ROW_L = 0;
+	let MAX_ROW = 7;
+	let start_INIT_FLAG = false;
+	let gameEnd = false;
+	let onlyOne = false;
+	const controlSigns = document.getElementById("ctrSigns");
+	const fGame = document.getElementById("fGame");		
+	const combFront = document.getElementById("combFront");
+	
+	control = new Control(MAX_ROW);
+	control.cInitGame();
+	control.cTransZoomOn();
+	
+	// START BUTTON - Start NEW GAME
+	startButton.addEventListener("click", function(){
+		if(start_INIT_FLAG == false){			
+			start_INIT_FLAG = true;			
+			trans_ROW_0 = 0;
+			trans_ROW_L = 0;
+			control.setCurrentRow(0);		
+			control.setCurrentCol(0);
+			control.cInitUserInput(); // create empty array
+			control.cRandomCombination(); // create random combination of 4 signs
+			
+			// remove Result info FRONT ( corect combination)
+			control.cResultInfoFrontOff(combFront);
+			
+			// remove initial game table   
+			control.cTransOff(onlyOne);
+			
+			if( ! onlyOne){ 
+				onlyOne = true; 
+			}
+			
+			// create user INPUT signs by RANDOM order 
+			control.cMakeRandomSigns(controlSigns);
+			setTimeout(() => {			
+				setEventPlayer(); // hook event listener to user input signs
+			}, 200);
+		}
+	});
+		
+	// END transition
+	control.row[0].div_el[8].ontransitionend = function(){ // .children[0].
+		
+		trans_ROW_0++;
+		
+		// console.log("trans_ROW_0: " + trans_ROW_0);
+		
+		if(start_INIT_FLAG == true && trans_ROW_0 == 1){
+			control.cRemoveI();
+			control.cCleaningRow();			
+			gameEnd = false;
+		}
+		console.log("trans_ROW_0: " + trans_ROW_0);		
+		console.log("start_INIT_FLAG: " + start_INIT_FLAG)
+	}
+	
+	control.row[MAX_ROW-1].div_el[8].ontransitionend = function(){
+		
+		trans_ROW_L++;
+				
+		if(gameEnd == true && trans_ROW_L == 2){
+			trans_ROW_L = 1;
+		}		
+				
+		if(trans_ROW_L == 2 && gameEnd == false){
+			control.cPutSignGame(0); // fa-caret-right
+			start_INIT_FLAG = false;
+			
+			// scroll to fGame, show entire playing table
+			control.cScrollTo(fGame);
+		}
+		
+		console.log("trans_ROW_L: " + trans_ROW_L);		
+		console.log("start_INIT_FLAG: " + start_INIT_FLAG)
+	}
+	
+	//----------------------------------------------------- 
+	
+	
+	// USER SIGNS
+	function setEventPlayer(){
+		ctrSigns = document.querySelectorAll(".ctr-sign");
+		ctrSigns.forEach(function(v, i){
+			v.children[0].addEventListener("click", function(event){
+				
+				// protect to click on signs durning transition (on start game)
+				// start_INIT_FLAG will be FALSE after transition ended
+				if(start_INIT_FLAG || gameEnd == true){
+					return '';
+				}	
+				
+				let signId = v.children[0].dataset.id;				
+				if(control.currentCol < 4 && Number(signId)){
+					control.currentCol++;
+					control.cPutSignGame(signId);
+					control.cSaveUserInput(signId); // array of player combination signs
+					
+					console.log("control.currentCol " + control.currentCol);
+				}
+			});
+		});
+	}
+	
+	// BUTTON - Delete User input
+	delButton.addEventListener("click", function(event){
+		if(start_INIT_FLAG || gameEnd == true){
+			return '';
+		}		
+		let signId = event.target.dataset.id;
+		if(signId == "delButton" && control.currentCol > 0 && control.currentCol < 5){
+			control.cRemoveSignGame(control.userInput[control.currentCol-1]); // remove last user input from game table
+			control.cRemoveUserInput(); // remove last user input from saved array
+			control.currentCol--;
+			
+			console.log("control.currentCol " + control.currentCol);
+		}
+	});
+	
+	// BUTTON - Check combination
+	checkButton.addEventListener("click", function(){
+		
+		console.log("checkButton CLICKED");
+		
+		if(control.currentCol < 4 || gameEnd == true ){
+			return "";
+		}
+		
+		console.log(control.userInput);
+		console.log(control.combination);
+		
+		//-----------------------------------
+		// calculate result for current ROW
+		//-----------------------------------
+		let result = control.cCalculateResult();
+		console.log("hitted: " + result["hitted"] + " hitted_pos: " + result["hitted_pos"]);
+		
+		//-----------------------------------
+		// display result for current ROW
+		//-----------------------------------
+		control.cDisplayResult(result['hitted'], result['hitted_pos']);
+		
+		//-----------------------------------
+		// end of game
+		//-----------------------------------
+		if((result['hitted'] == result['hitted_pos'] && result['hitted'] == 4) || control.currentRow == MAX_ROW-1){
+			gameEnd = true;
+		}
+		
+		//--------------------------------------------------------
+		// disply RESULT on THE END
+		//--------------------------------------------------------		
+		// gameEnd = true;
+		if(gameEnd == true){
+			const resultInfo = document.getElementById("resultInfo");
+			const resultInfoContent = document.getElementById("resultInfoContent");
+					
+			// Result info
+			setTimeout(() => {
+				control.cResultInfo(resultInfoContent, result);
+				control.cScrollTo(resultInfo);
+			}, 700);
+			
+			// SET Corect combination on FRONT
+			control.cSetCorectComb(combFrontSq);
+			
+			// Turn On animation Result info FRONT
+			setTimeout(() => {			
+				control.cResultInfoFrontOn(combFront);
+			}, 800);
+			
+			//  BUTTON - Close Result info box when game ended
+			resultInfoClose.addEventListener("click", () => {
+				resultInfo.style.display = "none";
+			});
+		}
+
+		//--------------------------------
+		// Set next ROW and first COLUMN
+		//--------------------------------
+		if(control.currentRow < (MAX_ROW-1) && gameEnd == false){			
+			control.cRemoveSignGame(0,0); // 0 - sign, 0 - position
+			control.currentRow++;
+			control.currentCol = 0;
+			control.cPutSignGame(0);
+			control.cInitUserInput();		
+		}
+		
+	});
+	
+</script>
+</body>
+</html>
